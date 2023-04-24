@@ -19,7 +19,6 @@ local function download_progress_callback(dltotal, dlcurr, _, _)
 end
 
 speed_test_module.download_speed = function(url)
-
 	local output_file = io.open("/dev/null", "r+")
 	if not output_file then error("Error while opening /dev/null for testing download speed.", 2) return false end
 
@@ -49,8 +48,7 @@ speed_test_module.download_speed = function(url)
 	return dl_speed
 end
 
-local function upload_progress_callback (_, _, uptotal, upcurr)
-	
+local function upload_progress_callback (_, _, uptotal, upcurr)	
 	local elapsed_time = socket.gettime() - test_time
 	local curr_speed = upcurr / elapsed_time / 1024 / 1024 * 8
 	if curr_speed > 0 then
@@ -61,7 +59,6 @@ local function upload_progress_callback (_, _, uptotal, upcurr)
 end
 
 speed_test_module.upload_speed =  function(url)
-
 	easy = curl.easy({
 		httpheader = {
 		"User-Agent: curl/7.81.0",
@@ -159,7 +156,6 @@ local function server_ping(url)
 
 	easy:close()
 	io.close(output_file)
-
 	return ping
 end
 
@@ -191,8 +187,7 @@ speed_test_module.find_best_server = function(servers, country)
 			lowest_ping_server = k
 			lowest_ping = v
 		end
-	end
-        
+	end        
 	return lowest_ping_server, lowest_ping
 end
 
