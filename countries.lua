@@ -1,5 +1,3 @@
-#!/usr/bin/lua
-
 local countries_module = {}
 countries_module.table = {}
 local cjson = require "cjson"
