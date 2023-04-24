@@ -46,7 +46,6 @@ local function download_speed(url)
 		url = url .. "/download",
 		writefunction = output_file,
 		[curl.OPT_NOPROGRESS] = 0,
-		[curl.OPT_PORT] = 8080,
 		progressfunction = download_progress_callback
 	})
 	if not status then print("Error: " .. easy .. " while initializing easy handle for testing download speed.") return false end
@@ -88,7 +87,6 @@ local function upload_speed(url)
 		"Cache-Control: no-cache"
 		},
 		url = url .. "/upload",
-		[curl.OPT_PORT] = 8080,
 		post = true,
 		noprogress = false,
 		progressfunction = upload_progress_callback,
