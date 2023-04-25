@@ -3,6 +3,8 @@ local test = require "speed_test_module"
 local argparser = require "argparse"
 local cjson = require "cjson"
 
+local dtraceback = debug.traceback
+function debug.traceback(...) local err, _ = ... print(err)end
 
 local parser = argparser("speed_test.lua", "Download and upload speed testing with given server script.")
 
@@ -23,12 +25,13 @@ elseif(args.best) then if test.download_server_list_json() then best_server, pin
 elseif(args.location) then location = test.geo_location() if location then print(cjson.encode({location = location["country"]})) end
 elseif(args.auto) then
 	local location = test.geo_location()
-
+	test.download_server_list_json()
 	if location then server, ping = test.find_best_server(test.read_server_list_json(), location["country"])	
-		test.download_server_list_json()
 		if server then dl_speed = test.download_speed(server) up_speed = test.upload_speed(server) end
 		local results = { location = location["country"], best_server = server, ping_s = ping, download_speed_mbps = dl_speed, upload_speed_mbps = up_speed }
 		print(cjson.encode(results))
 	end
 else print("speed_test.lua: try 'lua speed_test.lua -h' for more information.")
 end
+
+debug.traceback = dtraceback
