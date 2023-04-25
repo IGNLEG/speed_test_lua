@@ -8,7 +8,8 @@ local easy = curl.easy()
 local test_time = 0
 local status, value = true, ""
 
-local function download_progress_callback(dltotal, dlcurr, _, _)					
+local function download_progress_callback(dltotal, dlcurr, _, _)
+	if easy:getinfo(curl.INFO_RESPONSE_CODE) == 404 then return false, error("server returned 404 code", 0) end
 	local elapsedTime = socket.gettime() - test_time
 	local curr_speed = dlcurr / elapsedTime / 1024 / 1024 * 8
 	if curr_speed > 0 then
@@ -38,6 +39,7 @@ function speed_test_module.download_speed(url)
 	test_time = socket.gettime()
 	
 	status, value = pcall(easy.perform, easy)
+	--print(status, value)
 	if not status and value ~= "[CURL-EASY][ABORTED_BY_CALLBACK] Operation was aborted by an application callback (42)" then
 		print("Error: " .. value .. " while testing download speed with host ".. url)
                 return false
@@ -51,7 +53,7 @@ function speed_test_module.download_speed(url)
 end
 
 local function upload_progress_callback (_, _, uptotal, upcurr)
-	
+	if easy:getinfo(curl.INFO_RESPONSE_CODE) == 404 then return false, error("server returned 404 code", 0) end
 	local elapsed_time = socket.gettime() - test_time
 	local curr_speed = upcurr / elapsed_time / 1024 / 1024 * 8
 	if curr_speed > 0 then
@@ -72,6 +74,7 @@ function speed_test_module.upload_speed(url)
 		url = url .. "/upload",
 		post = true,
 		noprogress = false,
+		writefunction = io.open("/dev/null", "r+"),
 		progressfunction = upload_progress_callback,
 		httppost = curl.form({
 			file = {file = "/dev/zero", type = "text/plain", name = "zeros"}
@@ -82,6 +85,7 @@ function speed_test_module.upload_speed(url)
 	test_time = socket.gettime()
 
 	status, value = pcall(easy.perform, easy)
+
 	if not status and value ~= "[CURL-EASY][ABORTED_BY_CALLBACK] Operation was aborted by an application callback (42)"
 	and value ~= "[CURL-EASY][OPERATION_TIMEDOUT] Timeout was reached (28)" then
 		print("Error: " .. value .. " while testing upload speed with host ".. url)
