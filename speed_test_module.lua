@@ -129,7 +129,8 @@ end
 
 function speed_test_module.read_server_list_json()
 	local input_file = io.open("./servers_list.json", "r")
-	if not input_file then error("Error while opening server_list.json", 0) end
+	if not input_file then error("Error while opening servers_list.json", 0) end
+
 	local status, data = pcall(input_file.read, input_file, "*all")
 	if not status then error("Error: " .. data .. " while reading servers_list.json.", 0) end
 
@@ -171,6 +172,7 @@ end
 local function tidy_servers(servers, country)
 	local hosts = {}
 	local cc, name = country_parse.list(country)
+	if not cc or not name then error(country .. " is not a valid country code or country name,", 0) end
 	for _, v in ipairs(servers) do
 		if v["country"] == cc or v["country"] == name then
 			table.insert(hosts, v["host"])
@@ -182,16 +184,17 @@ end
 function speed_test_module.find_best_server(servers, country)
 	local status, hosts = pcall(tidy_servers, servers, country)
 	if not status then error("Error: " .. hosts .. " while filtering server list.", 0) end
+	if #hosts == 0 then error("Could not find servers with given country.") end
 	local lowest_ping_server = ""
 	local lowest_ping = 1e2
-	for k, v in ipairs(hosts) do
+	for _, v in ipairs(hosts) do
 		local ping = server_ping(v)
                 if ping ~= nil and ping < lowest_ping then
                         lowest_ping_server = v
 			lowest_ping = ping
                 end
 	end
-
+	if lowest_ping_server == "" or lowest_ping == 1e2 then error("Couldn't find best server for given country.", 0) end
 	return lowest_ping_server, lowest_ping
 end
 
